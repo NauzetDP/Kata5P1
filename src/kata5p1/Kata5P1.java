@@ -10,11 +10,12 @@ import java.sql.Statement;
 public class Kata5P1 {
     
     public static void main(String[] args) {
+        createNewTable();
         selectAll();
     }
     
     private static Connection connect() {
-        String url = "jdbc:sqlite:KATA5.db";
+        String url = "jdbc:sqlite:mail.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -25,7 +26,7 @@ public class Kata5P1 {
     }
     
     public static void selectAll(){
-        String sql = "SELECT * FROM PEOPLE";
+        String sql = "SELECT * FROM direcc_email";
         try (Connection conn = connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)){
@@ -39,5 +40,19 @@ public class Kata5P1 {
             System.out.println(e.getMessage());
         }
     }
+    
+    public static void createNewTable() {
+        String sql = "CREATE TABLE IF NOT EXISTS direcc_email (\n"
+        + " id integer PRIMARY KEY AUTOINCREMENT,\n"
+        + " direccion text NOT NULL);";
+        try (Connection conn = connect();
+            Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Tabla creada");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     
 }
