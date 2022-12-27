@@ -3,14 +3,19 @@ package kata5p1;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
+import kata5p1.model.Mail;
+import kata5p1.view.MailListReader;
 
 public class Kata5P1 {
     
     public static void main(String[] args) {
         createNewTable();
+        insertAllEmailsFromData("email.txt");
         selectAll();
     }
     
@@ -25,23 +30,21 @@ public class Kata5P1 {
         return conn;
     }
     
-    public static void selectAll(){
+    private static void selectAll(){
         String sql = "SELECT * FROM direcc_email";
         try (Connection conn = connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)){
             while (rs.next()) {
                 System.out.println(rs.getInt("id") + "\t" +
-                rs.getString("Name") + "\t" +
-                rs.getString("Apellido") + "\t" +
-                rs.getString("Departamento") + "\t");
+                rs.getString("direccion") + "\t");
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
     
-    public static void createNewTable() {
+    private static void createNewTable() {
         String sql = "CREATE TABLE IF NOT EXISTS direcc_email (\n"
         + " id integer PRIMARY KEY AUTOINCREMENT,\n"
         + " direccion text NOT NULL);";
@@ -53,6 +56,30 @@ public class Kata5P1 {
             System.out.println(e.getMessage());
         }
     }
+    
+    private static void insert(String email) {
+        String sql = "INSERT INTO direcc_email(direccion) VALUES(?)";
+        try (Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    private static void insertAllEmailsFromData(String dataPath) {
+        Iterable<Mail> mails = new MailListReader(dataPath).mails();
+        Iterator i = mails.iterator();
+        while(i.hasNext()) {
+            Mail m = (Mail)i.next();
+            if (m == null) {
+                break;
+            }
+            insert(m.getMail());
+        }
+    }
+
 
     
 }
